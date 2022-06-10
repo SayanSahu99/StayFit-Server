@@ -1,17 +1,20 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var cors = require('cors');
-var connectdb = require('./database/connection');
+let createError = require('http-errors');
+let express = require('express');
+let path = require('path');
+let cookieParser = require('cookie-parser');
+let logger = require('morgan');
+let cors = require('cors');
+let connectdb = require('./database/connection');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+let indexRouter = require('./routes/index');
+let usersRouter = require('./routes/users');
+let authRouter = require('./routes/auth');
+let consumptionListRouter = require('./routes/consumption');
+let profileRouter = require('./routes/profile');
 
 require("dotenv").config();
 
-var app = express();
+let app = express();
 const PORT = process.env.PORT || 8000;
 
 // view engine setup
@@ -34,6 +37,9 @@ connectdb(DATABASE_CONNECTION, DATABASE_PORT);
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/auth', authRouter);
+app.use('/consumption', consumptionListRouter);
+app.use('/profile', profileRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
