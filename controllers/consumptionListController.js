@@ -12,7 +12,7 @@ const getConsumptionList = async (req, res) => {
     }
 
     try {
-        let user = '62a22884eb0450a95f5413df';
+        let user = req.user.id;
 
         let list = await consumptionList.findOne({
             user: user
@@ -20,13 +20,13 @@ const getConsumptionList = async (req, res) => {
 
         // We check if the user has a consumption list, if not, we create it
         if (!list) {
-            res.status(500).send('No consumption list');
+           return res.status(500).send('No consumption list');
         }
 
-        res.json(list);
+        return res.json(list);
     } catch (error) {
         errorLogger(req, 1, error);
-        res.status(500).send('Server error');
+        return res.status(500).send('Server error');
     }
 
 }
@@ -39,7 +39,8 @@ const getConsumptionListByDate = async (req, res) => {
 
     try {
         let date = new Date(req.params.date_string);
-        let user = '62a22884eb0450a95f5413df';
+        let user = req.user.id;
+        console.log(date)
 
         let list = await consumptionList.findOne(
             {
@@ -50,7 +51,8 @@ const getConsumptionListByDate = async (req, res) => {
 
         // We check if the user has a consumption list, if not, we create it
         if (!list) {
-            res.status(500).send('No consumption list');
+            console.log("No consumption List");
+            return res.status(500).send('No consumption list');
         }
 
         // Get the list of food for that day
@@ -60,7 +62,7 @@ const getConsumptionListByDate = async (req, res) => {
 
         //console.log(list);
 
-        res.json(list);
+        return res.json(list);
     } catch (error) {
         errorLogger(req, 1, error);
         res.status(500).send('Server error');
@@ -77,7 +79,7 @@ const updateConsumptionList = async (req, res) => {
     try {
         const body = req.body;
         let date = new Date(req.body.date);
-        let user = '62a22884eb0450a95f5413df';
+        let user = req.user.id;
 
         // Check if user exists
         let list = await consumptionList.findOne({
@@ -95,7 +97,7 @@ const updateConsumptionList = async (req, res) => {
             list.consumptionList = body.consumptionList;
             await list.save();
 
-            res.json('Consumption List has been updated');
+            res.json({status: "success", msg: 'Consumption List has been updated'});
         }
 
         else {
@@ -111,7 +113,7 @@ const updateConsumptionList = async (req, res) => {
         
                 list.consumptionList = body.consumptionList;
                 await list.save();
-                res.json('Consumption List has been updated (Same Day)');
+                res.json({status:"suceess", msg: 'Consumption List has been updated (Same Day)'});
             }
 
             else {
@@ -120,7 +122,7 @@ const updateConsumptionList = async (req, res) => {
                 await consumptionList.findOneAndUpdate({
                     user: user
                 }, { $push: { consumptionList: body.consumptionList } });
-                res.json('Consumption List has been updated (Different Date)');
+                res.json({status: "success", msg:'Consumption List has been updated (Different Date)'});
             }
         }
 
