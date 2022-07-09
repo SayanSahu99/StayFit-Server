@@ -1,19 +1,20 @@
 const Joi = require('joi');
 const bcrypt = require('bcrypt');
 const { User } = require('../models/users');
+const jwt = require('jsonwebtoken');
 
 const authRegister = async (req, res, next) => {
-  
+
     //First Validate The Request
     // const { error } = validate(req.body);
     // if (error) {
     //     return res.status(400).send(error.details[0].message);
     // }
-  
+
     // Check if this user already exisits
     let user = await User.findOne({ email: req.body.email });
     if (user) {
-        return res.status(400).json({status: 'SignUp Failed'});
+        return res.status(400).json({ status: 'SignUp Failed' });
     } else {
         // Insert the new user if they do not exist yet
         user = new User({
@@ -23,9 +24,23 @@ const authRegister = async (req, res, next) => {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, salt);
         await user.save();
-        res.json({status: 'success'});
+        const payload = {
+            user: {
+                id: user.id,
+            },
+        };
+
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: '365 days' },
+            (err, token) => {
+                if (err) throw err;
+                return res.json({ token: token, status: 'success'});
+            }
+        );
     }
-  }
+}
 
 // Login User
 const authLogin = async (req, res) => {
@@ -47,6 +62,19 @@ const authLogin = async (req, res) => {
     if (!validPassword) {
         return res.status(400).send('Incorrect email or password.');
     }
+
+    const payload = {
+        user: {
+            id: user.id,
+        },
+    };
+
+    const expiresIn = '365 days';
+
+    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn }, (err, token) => {
+        if (err) throw err;
+        res.json({ token });
+    });
 
     res.send(true);
 }
