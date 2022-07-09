@@ -9,7 +9,9 @@ const getProfile = async (req, res) => {
     }
 
     try {
-        let user = '62a22884eb0450a95f5413df';
+        let user = req.user.id;
+
+        console.log("User ID: ", req.user.id);
 
         let list = await Profile.findOne({
             user: user
@@ -30,12 +32,16 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     const errors = validationResult(req);
+    
+    let profile_obj = JSON.parse(JSON.stringify(req.body));
+    console.log(profile_obj); 
+
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
     try {
-        let user = '62a22884eb0450a95f5413df';
+        let user = req.user.id;
 
         let profile = await Profile.findOne({
             user: user
@@ -47,7 +53,7 @@ const updateProfile = async (req, res) => {
             newProfile.user = user;
             profile = await Profile.create(newProfile);
             profile.save();
-            return res.send("Profile Created");
+            return res.json({status: "success", msg: "Profile Created"});
         }
 
         else {
@@ -61,11 +67,11 @@ const updateProfile = async (req, res) => {
             await profile.save();
         }
 
-        return res.json('Profile has been updated');
+        return res.json({status: "success", msg: "Profile Updated"});
 
     } catch (error) {
         errorLogger(req, 1, error);
-        res.status(500).send('Server error');
+        res.status(500).json({status: "fail", msg: "Profile Update Failed"});
     }
 }
 
