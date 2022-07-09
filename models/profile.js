@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const Profile = mongoose.model('Profile', new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: true,
+      },
     name: {
         type: String,
         required: true,
